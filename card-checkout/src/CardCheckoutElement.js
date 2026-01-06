@@ -1,5 +1,6 @@
 import { validateCardNumber, validateCardExpiry, validateCVC, validatePostal } from './validators.js';
 import { createSecureToken } from './tokenService.js';
+import './CardField.js'; 
 
 
 class CardCheckoutElement extends HTMLElement {
@@ -79,29 +80,29 @@ class CardCheckoutElement extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>${this.styles()}</style>
       <form novalidate>
-        <label>
-          ${this.labels.card}
-          <input id="cardNumber" placeholder="${this.placeholders.card}" autocomplete="cc-number" />
-          <span class="error" id="cardNumberError"></span>
-        </label>
+        <card-field
+          label="${this.labels.card}"
+          placeholder="${this.placeholders.card}"
+          input-id="cardNumber">
+        </card-field>
 
-        <label>
-          ${this.labels.expiry}
-          <input id="expiry" placeholder="${this.placeholders.expiry}" autocomplete="cc-exp" />
-          <span class="error" id="expiryError"></span>
-        </label>
+        <card-field
+          label="${this.labels.expiry}"
+          placeholder="${this.placeholders.expiry}"
+          input-id="expiry">
+        </card-field>
 
-        <label>
-          ${this.labels.cvc}
-          <input id="cvc" placeholder="${this.placeholders.cvc}" autocomplete="cc-csc" />
-          <span class="error" id="cvcError"></span>
-        </label>
+        <card-field
+          label="${this.labels.cvc}"
+          placeholder="${this.placeholders.cvc}"
+          input-id="cvc">
+        </card-field>
 
-        <label>
-           ${this.labels.postal}
-          <input id="postal" placeholder="${this.placeholders.postal}" autocomplete="postal-code" />
-          <span class="error" id="postalError"></span>
-        </label>
+        <card-field
+          label="${this.labels.postal}"
+          placeholder="${this.placeholders.postal}"
+          input-id="postal">
+        </card-field>
 
         <button type="submit" disabled>${this.buttonText}</button>
       </form>
@@ -122,54 +123,115 @@ class CardCheckoutElement extends HTMLElement {
 
 
 attachEvents() {
-  const form = this.shadowRoot.querySelector('form');
-  const inputs = {
-    card: this.shadowRoot.querySelector('#cardNumber'),
-    expiry: this.shadowRoot.querySelector('#expiry'),
-    cvc: this.shadowRoot.querySelector('#cvc'),
-    postal: this.shadowRoot.querySelector('#postal')
-  };
-  const errors = {
-    card: this.shadowRoot.querySelector('#cardNumberError'),
-    expiry: this.shadowRoot.querySelector('#expiryError'),
-    cvc: this.shadowRoot.querySelector('#cvcError'),
-    postal: this.shadowRoot.querySelector('#postalError')
-  };
-  const submitBtn = this.shadowRoot.querySelector('button');
+  // Get all card-field elements
+  const fields = this.shadowRoot.querySelectorAll('card-field');
 
+  // Map inputs and errors from each card-field's shadow DOM
+  const inputs = {
+    card: fields[0].shadowRoot.querySelector('input'),
+    expiry: fields[1].shadowRoot.querySelector('input'),
+    cvc: fields[2].shadowRoot.querySelector('input'),
+    postal: fields[3].shadowRoot.querySelector('input')
+  };
+
+  console.log('inputs', inputs);
+  const errors = {
+    card: fields[0].shadowRoot.querySelector('span.error'),
+    expiry: fields[1].shadowRoot.querySelector('span.error'),
+    cvc: fields[2].shadowRoot.querySelector('span.error'),
+    postal: fields[3].shadowRoot.querySelector('span.error')
+  };
+
+  const submitBtn = this.shadowRoot.querySelector('button[type="submit"]');
+
+  // Validation function
   const checkValidity = () => {
     let valid = true;
 
-    if (!validateCardNumber(inputs.card.value)) { valid = false; errors.card.textContent = 'Invalid card number'; inputs.card.classList.add('invalid'); } 
-    else { errors.card.textContent = ''; inputs.card.classList.remove('invalid'); }
+    // Card Number
+    if (!validateCardNumber(inputs.card.value)) {
+      valid = false;
+      errors.card.textContent = 'Invalid card number';
+      inputs.card.classList.add('invalid');
+      inputs.card.setAttribute('aria-invalid', 'true');
+    } else {
+      errors.card.textContent = '';
+      inputs.card.classList.remove('invalid');
+      inputs.card.setAttribute('aria-invalid', 'false');
+    }
 
-    if (!validateCardExpiry(inputs.expiry.value)) { valid = false; errors.expiry.textContent = 'Invalid expiry'; inputs.expiry.classList.add('invalid'); } 
-    else { errors.expiry.textContent = ''; inputs.expiry.classList.remove('invalid'); }
+    // Expiry
+    if (!validateCardExpiry(inputs.expiry.value)) {
+      valid = false;
+      errors.expiry.textContent = 'Invalid expiry';
+      inputs.expiry.classList.add('invalid');
+      inputs.expiry.setAttribute('aria-invalid', 'true');
+    } else {
+      errors.expiry.textContent = '';
+      inputs.expiry.classList.remove('invalid');
+      inputs.expiry.setAttribute('aria-invalid', 'false');
+    }
 
-    if (!validateCVC(inputs.cvc.value)) { valid = false; errors.cvc.textContent = 'Invalid CVC'; inputs.cvc.classList.add('invalid'); } 
-    else { errors.cvc.textContent = ''; inputs.cvc.classList.remove('invalid'); }
+    // CVC
+    if (!validateCVC(inputs.cvc.value)) {
+      valid = false;
+      errors.cvc.textContent = 'Invalid CVC';
+      inputs.cvc.classList.add('invalid');
+      inputs.cvc.setAttribute('aria-invalid', 'true');
+    } else {
+      errors.cvc.textContent = '';
+      inputs.cvc.classList.remove('invalid');
+      inputs.cvc.setAttribute('aria-invalid', 'false');
+    }
 
-    if (!validatePostal(inputs.postal.value)) { valid = false; errors.postal.textContent = 'Invalid postal code'; inputs.postal.classList.add('invalid'); } 
-    else { errors.postal.textContent = ''; inputs.postal.classList.remove('invalid'); }
+    // Postal Code
+    if (!validatePostal(inputs.postal.value)) {
+      valid = false;
+      errors.postal.textContent = 'Invalid postal code';
+      inputs.postal.classList.add('invalid');
+      inputs.postal.setAttribute('aria-invalid', 'true');
+    } else {
+      errors.postal.textContent = '';
+      inputs.postal.classList.remove('invalid');
+      inputs.postal.setAttribute('aria-invalid', 'false');
+    }
 
     submitBtn.disabled = !valid;
+
+    // Emit validationChange event for host apps
+    this.dispatchEvent(new CustomEvent('validationChange', {
+      detail: { isValid: valid },
+      bubbles: true
+    }));
+
     return valid;
   };
 
-  Object.values(inputs).forEach(input => input.addEventListener('input', checkValidity));
+  // Attach real-time input validation
+  Object.values(inputs).forEach(input => {
+    input.addEventListener('input', checkValidity);
+  });
 
-  form.addEventListener('submit', e => {
+  // Handle form submission
+  const form = this.shadowRoot.querySelector('form');
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!checkValidity()) return;
 
-    const token = createSecureToken({
-      number: inputs.card.value,
+    // Generate token (dummy)
+    const token = await createSecureToken({
+      cardNumber: inputs.card.value,
       expiry: inputs.expiry.value,
       cvc: inputs.cvc.value,
       postal: inputs.postal.value
     });
 
+    // Emit tokenReady event
     this.dispatchEvent(new CustomEvent('tokenReady', { detail: token, bubbles: true }));
+
+    // Call dummy payment API
+    const result = await fakePaymentAPI(token);
+    alert(`Payment status: ${result.status}`);
   });
 }
 }
