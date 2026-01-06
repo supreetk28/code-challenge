@@ -30,11 +30,39 @@ export class CardField extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
-        label { display: block; margin-bottom: 12px; font-family: inherit; }
-        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        input.invalid { border-color: red; }
-        .error { color: red; font-size: 12px; }
+        :host {
+          --input-padding: 8px;
+          --input-border: 1px solid #ccc;
+          --input-border-radius: 4px;
+          --error-color: red;
+          --font-family: inherit;
+          display: block;
+        }
+
+        label {
+          display: block;
+          margin-bottom: 12px;
+          font-family: var(--font-family);
+        }
+
+        input {
+          width: 100%;
+          padding: var(--input-padding);
+          border: var(--input-border);
+          border-radius: var(--input-border-radius);
+          box-sizing: border-box;
+        }
+
+        input.invalid {
+          border-color: var(--error-color);
+        }
+
+        .error {
+          color: var(--error-color);
+          font-size: 12px;
+        }
       </style>
+
       <label>
         ${this._label}
         <input id="${this._inputId}" placeholder="${this._placeholder}" />

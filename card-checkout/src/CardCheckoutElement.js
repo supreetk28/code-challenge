@@ -109,17 +109,63 @@ class CardCheckoutElement extends HTMLElement {
     `;
   }
 
-  styles() {
-    return `
-      :host { --primary-color: #22c55e; font-family: 'Inter', sans-serif; display: block; max-width: 400px; }
-      label { display: block; margin-bottom: 12px; }
-      input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-      input.invalid { border-color: red; }
-      .error { color: red; font-size: 12px; }
-      button { margin-top: 12px; width: 100%; padding: 10px; background: var(--primary-color); color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-      button:disabled { opacity: 0.5; cursor: not-allowed; }
-    `;
-  }
+styles() {
+  return `
+    :host {
+      --primary-color: #22c55e;       /* Button background */
+      --font-family: 'Inter', sans-serif;
+      --input-border: 1px solid #ccc;
+      --input-padding: 8px;
+      --input-border-radius: 4px;
+      --button-radius: 4px;
+      --button-color: #fff;           /* Button text color */
+      --error-color: var(--error-color);
+      
+      display: block;
+      max-width: 400px;
+      font-family: var(--font-family);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    input {
+      width: 100%;
+      padding: var(--input-padding);
+      border: var(--input-border);
+      border-radius: var(--input-border-radius);
+      box-sizing: border-box;
+    }
+
+    input.invalid {
+      border-color: var(--error-color);
+    }
+
+    .error {
+      color: var(--error-color);
+      font-size: 12px;
+    }
+
+    button {
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px;
+      background: var(--primary-color);
+      color: var(--button-color);
+      border: none;
+      border-radius: var(--button-radius);
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  `;
+}
+
 
 
 attachEvents() {
