@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Card Checkout Demo</title>
+  <script type="module" src="../src/CardCheckoutElement.js"></script>
+</head>
+<body>
+  <card-checkout-element></card-checkout-element>
+
+  <script>
+    document.querySelector('card-checkout-element').addEventListener('tokenReady', async e => {
+      console.log('Token received:', e.detail);
+
+      // Dummy API call simulation
+      const response = await fakePaymentAPI(e.detail.token);
+      alert(`Payment status: ${response.status}`);
+    });
+
+    function fakePaymentAPI(token) {
+      return new Promise(resolve => setTimeout(() => resolve({ status: 'success', transactionId: 'txn_001' }), 1000));
+    }
+  </script>
+</body>
+</html>
