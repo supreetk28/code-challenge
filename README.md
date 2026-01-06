@@ -111,6 +111,27 @@ The Card Checkout Web Component is built using **Vanilla JavaScript** and **Web 
 - If no handler is provided, a dummy token is used to simulate a payment flow.
 - Submission errors are caught and logged in `console.error`.
 
+
+### Supported Card Types & Test Values
+
+This component validates card numbers using the Luhn algorithm and supports major card types. For demo and testing purposes, you can use the following test card numbers:
+
+| Card Type      | Example Number      | Notes / Expected Input                        |
+| -------------- | ------------------- | --------------------------------------------- |
+| **Visa**       | 4111 1111 1111 1111 | 16 digits, any future expiry, any 3-digit CVC |
+| **Mastercard** | 5555 5555 5555 4444 | 16 digits, any future expiry, any 3-digit CVC |
+| **Amex**       | 3782 822463 10005   | 15 digits, any future expiry, any 4-digit CVC |
+| **Discover**   | 6011 1111 1111 1117 | 16 digits, any future expiry, any 3-digit CVC |
+
+
+Other Input Rules:
+
+Expiry: MM/YY format (month: 01–12, future year only)
+
+CVC: 3 or 4 digits depending on card type (Amex = 4 digits)
+
+Postal / ZIP: 5-digit US ZIP code (optionally 5+4 format, e.g., 12345-6789)
+
 ---
 
 ## Usage
