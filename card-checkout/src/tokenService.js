@@ -1,9 +1,12 @@
 export function createSecureToken(cardData) {
-  const cardNumber = cardData.cardNumber || ''; // fallback if undefined
+  if (!cardData || typeof cardData.cardNumber !== 'string') {
+    throw new Error('Invalid card data: cardNumber must be a string');
+  }
+
   return {
     token: 'tok_' + crypto.randomUUID(),
-    lastFour: cardNumber.slice(-4),
+    lastFour: cardData.cardNumber.slice(-4),
     brand: 'Visa',
-    expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
+    expiresAt: Date.now() + 5 * 60 * 1000
   };
 }

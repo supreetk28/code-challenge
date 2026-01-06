@@ -31,12 +31,20 @@ class CardCheckoutElement extends HTMLElement {
 
   this.buttonText = 'Pay';
 
+  this.paymentHandler = null;
+
   }
 
   connectedCallback() {
     this.render();
     this.attachEvents();
   }
+
+ setPaymentHandler(fn) {
+  if (typeof fn === 'function') {
+    this.paymentHandler = fn;
+  }
+}
 
   attributeChangedCallback(name, oldValue, newValue) {
   if (!newValue) return;
