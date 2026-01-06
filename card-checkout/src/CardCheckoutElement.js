@@ -1,10 +1,35 @@
 import { validateCardNumber, validateCardExpiry, validateCVC, validatePostal } from './validators.js';
 import { createSecureToken } from './tokenService.js';
 
+
 class CardCheckoutElement extends HTMLElement {
+
+  static get observedAttributes() {
+    return ['label-card', 'label-expiry', 'label-cvc', 'label-postal', 'placeholder-card', 'placeholder-expiry', 'placeholder-cvc', 'placeholder-postal',
+    'button-text'];
+  }
+
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+
+    // Default labels
+  this.labels = {
+    card: 'Card Number',
+    expiry: 'Expiry (MM/YY)',
+    cvc: 'CVC',
+    postal: 'Postal Code'
+  };
+
+   this.placeholders = {
+    card: 'XXXX-XXXX-XXXX-XXXX',
+    expiry: 'MM/YY',
+    cvc: '123',
+    postal: '12345'
+  };
+
+  this.buttonText = 'Pay';
+
   }
 
   connectedCallback() {
@@ -12,35 +37,73 @@ class CardCheckoutElement extends HTMLElement {
     this.attachEvents();
   }
 
+  attributeChangedCallback(name, oldValue, newValue) {
+  if (!newValue) return;
+
+  switch (name) {
+    case 'label-card':
+      this.labels.card = newValue;
+      break;
+    case 'label-expiry':
+      this.labels.expiry = newValue;
+      break;
+    case 'label-cvc':
+      this.labels.cvc = newValue;
+      break;
+    case 'label-postal':
+      this.labels.postal = newValue;
+      break;
+    case 'placeholder-card': 
+      this.placeholders.card = newValue; 
+      break;
+    case 'placeholder-expiry': 
+      this.placeholders.expiry = newValue; 
+      break;
+    case 'placeholder-cvc': 
+      this.placeholders.cvc = newValue; 
+      break;
+    case 'placeholder-postal': 
+      this.placeholders.postal = newValue; 
+      break;
+    case 'button-text': 
+      this.buttonText = newValue; 
+      break;    
+  }
+
+  // Re-render to update labels
+  this.render();
+}
+
+
   render() {
     this.shadowRoot.innerHTML = `
       <style>${this.styles()}</style>
       <form novalidate>
         <label>
-          Card Number
-          <input id="cardNumber" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="cc-number" />
+          ${this.labels.card}
+          <input id="cardNumber" placeholder="${this.placeholders.card}" autocomplete="cc-number" />
           <span class="error" id="cardNumberError"></span>
         </label>
 
         <label>
-          Expiry (MM/YY)
-          <input id="expiry" placeholder="MM/YY" autocomplete="cc-exp" />
+          ${this.labels.expiry}
+          <input id="expiry" placeholder="${this.placeholders.expiry}" autocomplete="cc-exp" />
           <span class="error" id="expiryError"></span>
         </label>
 
         <label>
-          CVC
-          <input id="cvc" placeholder="123" autocomplete="cc-csc" />
+          ${this.labels.cvc}
+          <input id="cvc" placeholder="${this.placeholders.cvc}" autocomplete="cc-csc" />
           <span class="error" id="cvcError"></span>
         </label>
 
         <label>
-          Postal Code
-          <input id="postal" placeholder="12345" autocomplete="postal-code" />
+           ${this.labels.postal}
+          <input id="postal" placeholder="${this.placeholders.postal}" autocomplete="postal-code" />
           <span class="error" id="postalError"></span>
         </label>
 
-        <button type="submit" disabled>Pay</button>
+        <button type="submit" disabled>${this.buttonText}</button>
       </form>
     `;
   }
